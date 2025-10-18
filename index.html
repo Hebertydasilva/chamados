@@ -406,8 +406,7 @@
 
     // Boot
     setupNumeroMaskInit();
-    // login anônimo e, quando autenticado, conecta realtime
-    signInAnonymously(auth).then(()=> attachRealtime());
+    attachRealtime();   // <- registra o onValue agora
   </script>
 </body>
 </html>
