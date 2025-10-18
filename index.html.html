@@ -1,0 +1,413 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard de Chamados Resolvidos • Roxo Suave</title>
+  <style>
+    :root{
+      --bg:#241a3b; --bg2:#1d1530; --panel:#2e2152; --card:#2a1e4a; --border:#3b2f63;
+      --text:#e4e4e7; --muted:#a1a1aa;
+      --primary:#8b5cf6; --primary-2:#7c3aed; --accent:#06b6d4;
+      --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+      --chip:#3a2e61; --shadow:0 12px 28px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2) 70%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    header{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:16px}
+    .title{font-size:clamp(18px,2.5vw,28px);font-weight:800;letter-spacing:.3px}
+    .subtitle{color:var(--muted);font-size:12px}
+    .panel{background:linear-gradient(180deg,var(--panel),#271c49);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .grid{display:grid;grid-template-columns:1.1fr 1.1fr .8fr .8fr .7fr;gap:10px}
+    label{font-size:12px;color:var(--muted)}
+    input,textarea,select{width:100%;border:1px solid var(--border);background:#221843;color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(6,182,212,.15)}
+    textarea{min-height:64px;resize:vertical}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{border:1px solid var(--border);background:#23194a;color:var(--text);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--primary),var(--primary-2));color:#0b041a;border:0}
+    button.ghost{background:transparent}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .chip{background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:#ddd}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+    .stat{background:linear-gradient(180deg,var(--panel),#261b48);border:1px solid var(--border);border-radius:14px;padding:14px}
+    .stat h3{margin:0;font-size:12px;color:var(--muted)}
+    .stat p{margin:6px 0 0 0;font-size:22px;font-weight:800;color:#f5f3ff}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
+    tbody tr{background:var(--card);border:1px solid var(--border)}
+    tbody td{padding:12px 10px;vertical-align:top}
+    tbody tr{border-radius:12px}
+    tbody tr td:first-child{border-radius:12px 0 0 12px}
+    tbody tr td:last-child{border-radius:0 12px 12px 0}
+    .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
+    .b-ok{background:rgba(34,197,94,.15);color:#b7ffd9;border-color:#256f43}
+    .b-no{background:rgba(239,68,68,.12);color:#ffc0c5;border-color:#7a2b32}
+    .muted{color:var(--muted)}
+    .right{display:flex;gap:6px;justify-content:flex-end}
+    .sortable{cursor:pointer}
+    .sortable::after{content:" ⥯";opacity:.4}
+    /* compacto Y */
+    table.compact-rows{border-spacing:0 4px}
+    table.compact-rows thead th{padding:0 8px;font-size:11px}
+    table.compact-rows tbody td{padding:6px 8px;font-size:13px;line-height:1.15}
+    table.compact-rows .badge{padding:2px 6px;font-size:11px}
+    table.compact-rows .right{gap:4px}
+    table.compact-rows .right button{padding:6px 10px;font-size:12px;border-radius:8px}
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}
+    .modal.open{display:flex}
+    .backdrop{position:absolute;inset:0;background:rgba(5,0,20,.55);backdrop-filter:blur(2px)}
+    .dialog{position:relative;width:min(920px,96vw);background:linear-gradient(180deg,var(--panel),#261b48);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px;transform:translateY(10px);opacity:0;transition:transform .18s ease,opacity .18s ease}
+    .modal.open .dialog{transform:none;opacity:1}
+    .dialog header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .dialog h2{margin:0;font-size:18px}
+    .close-x{background:transparent;border:0;color:var(--muted);font-size:20px;line-height:1;cursor:pointer}
+    .dialog .actions{justify-content:flex-end}
+    body.modal-open{overflow:hidden}
+    .dialog.small{width:min(420px,94vw)}
+    .error{font-size:12px;color:#ffe4e6;background:rgba(239,68,68,.12);border:1px solid #7a2b32;padding:6px 8px;border-radius:8px;display:none;margin-top:8px}
+    .error.show{display:block}
+    @media (max-width:900px){ .grid{grid-template-columns:1fr} .stats{grid-template-columns:repeat(2,1fr)} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="title">Chamados Resolvidos</div>
+        <div class="subtitle">Visualize e cadastre chamados resolvidos.</div>
+      </div>
+      <div class="chips">
+        <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
+        <span class="chip">Local • <span id="today"></span></span>
+        <span class="chip" id="storageChip">Armazenamento: <strong>Firebase</strong></span>
+      </div>
+    </header>
+
+    <section>
+      <div class="stats">
+        <div class="stat"><h3>Total cadastrados</h3><p id="kTotal">0</p></div>
+        <div class="stat"><h3>Validados com cliente</h3><p id="kValidados">0</p></div>
+        <div class="stat"><h3>Não validados</h3><p id="kNao">0</p></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div style="overflow:auto">
+        <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
+          <thead>
+            <tr>
+              <th class="sortable" data-key="numero">Nº chamado</th>
+              <th class="sortable" data-key="problema">Problema de config</th>
+              <th class="sortable" data-key="ajuste">Ajuste feito</th>
+              <th class="sortable" data-key="validado">Validado?</th>
+              <th class="sortable" data-key="fechado">Encerrado?</th>
+              <th class="sortable" data-key="datetime">Data/Hora</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal do formulário -->
+  <div id="formModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="backdrop" id="modalBackdrop"></div>
+    <div class="dialog" role="document">
+      <header>
+        <h2>Novo chamado resolvido</h2>
+        <button class="close-x" id="closeFormBtn" aria-label="Fechar">×</button>
+      </header>
+      <form id="form">
+        <div class="grid">
+          <div>
+            <label for="numero">Número do chamado *</label>
+            <input id="numero" required placeholder="Ex.: 0958892025"
+                   inputmode="numeric" maxlength="10" autocomplete="off" />
+          </div>
+          <div>
+            <label for="validado">Validado com cliente? *</label>
+            <select id="validado" required>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+            </select>
+          </div>
+          <div>
+            <label for="fechado">Chamado encerrado?</label>
+            <select id="fechado">
+              <option value="Sim">Sim</option>
+              <option value="Não" selected>Não</option>
+            </select>
+          </div>
+          <div>
+            <label for="data">Data</label>
+            <input id="data" type="date" />
+          </div>
+          <div>
+            <label for="hora">Hora</label>
+            <input id="hora" type="time" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="problema">Problema de configuração *</label>
+            <textarea id="problema" required></textarea>
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="ajuste">Ajuste feito *</label>
+            <textarea id="ajuste" required></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="cancelBtn" class="ghost">Cancelar</button>
+          <button class="primary" id="saveBtn" type="submit">Salvar chamado</button>
+        </div>
+        <input type="hidden" id="editingKey" />
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Senha -->
+  <div id="pwModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="backdrop" id="pwBackdrop"></div>
+    <div class="dialog small" role="document">
+      <header>
+        <h2>Digite a senha</h2>
+        <button class="close-x" id="pwClose" aria-label="Fechar">×</button>
+      </header>
+      <div>
+        <label for="pwInput">Senha para editar/excluir</label>
+        <input id="pwInput" type="password" placeholder="••••" autocomplete="current-password" />
+        <div id="pwError" class="error">Senha incorreta.</div>
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button class="ghost" id="pwCancel">Cancelar</button>
+        <button class="primary" id="pwOk">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <script type="module">
+    /**** Firebase (v10+) ****/
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // --------------- SUBSTITUA pelos seus dados do Firebase ---------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9mKJdgtX8u49g4Ua1uUc7ELLlaKfM",
+      authDomain: "teste0109-6f255.firebaseapp.com",
+      databaseURL: "https://teste0109-6f255-default-rtdb.firebaseio.com",
+      projectId: "teste0109-6f255",
+      storageBucket: "teste0109-6f255.appspot.com",
+      messagingSenderId: "431927631481",
+      appId: "1:431927631481:web:946543ab893d6a6b6d582a8"
+	  measurementId: "G-SCCKP9W9HK"
+    };
+    // ----------------------------------------------------------------------
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Caminho compartilhado (troque "public" se quiser separar por equipe)
+    const BASE_PATH = 'orgs/public/chamados';
+
+    // Estado
+    const el = (id)=>document.getElementById(id);
+    const state = { rows: [], sort:{key:'datetime', dir:'desc'} };
+    const EDIT_PASSWORD = '1234'; // ajuste se quiser
+
+    // Utils
+    const todayISO = () => new Date().toISOString().split('T')[0];
+    const timeHM = () => { const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
+    const fmtDate = (iso) => { try{ return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) }catch{ return '-' } }
+    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+
+    // Modal formulário
+    function openModal(){ const m = el('formModal'); m.classList.add('open'); document.body.classList.add('modal-open'); resetForm(); el('numero').focus(); }
+    function closeModal(){ const m = el('formModal'); m.classList.remove('open'); document.body.classList.remove('modal-open'); }
+
+    // Modal senha
+    function openPwModal(){ const m = el('pwModal'); m.classList.add('open'); document.body.classList.add('modal-open'); el('pwInput').value=''; el('pwError').classList.remove('show'); setTimeout(()=>el('pwInput').focus(), 0); }
+    function closePwModal(){ const m = el('pwModal'); m.classList.remove('open'); document.body.classList.remove('modal-open'); }
+    function askPassword(){
+      return new Promise((resolve)=>{
+        openPwModal();
+        const onOk = ()=>{ const ok = el('pwInput').value === EDIT_PASSWORD; if(ok){ cleanup(); closePwModal(); resolve(true); } else { el('pwError').classList.add('show'); el('pwInput').focus(); } };
+        const onCancel = ()=>{ cleanup(); closePwModal(); resolve(false); };
+        const onKey = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); onOk(); } };
+        function cleanup(){
+          el('pwOk').removeEventListener('click', onOk);
+          el('pwCancel').removeEventListener('click', onCancel);
+          el('pwClose').removeEventListener('click', onCancel);
+          el('pwBackdrop').removeEventListener('click', onCancel);
+          el('pwInput').removeEventListener('keydown', onKey);
+        }
+        el('pwOk').addEventListener('click', onOk);
+        el('pwCancel').addEventListener('click', onCancel);
+        el('pwClose').addEventListener('click', onCancel);
+        el('pwBackdrop').addEventListener('click', onCancel);
+        el('pwInput').addEventListener('keydown', onKey);
+      });
+    }
+    async function checkPassword(){ return await askPassword(); }
+
+    // Máscara do Número do chamado
+    function setupNumeroMask(){
+      const numero = el('numero');
+      const normalize = (raw) => {
+        let v = (raw || '').replace(/\D/g, '');
+        if (v.length > 10) v = v.slice(0, 10);
+        if (v.length === 6) {
+          v = v + '2025';
+        } else if (v.length > 6) {
+          v = v.slice(0, 6) + '2025' + v.slice(10);
+          v = v.slice(0, 10);
+        }
+        return v;
+      };
+      numero.addEventListener('input', (e) => {
+        const v = normalize(e.target.value);
+        if (e.target.value !== v) {
+          const end = v.length; e.target.value = v; e.target.setSelectionRange(end, end);
+        }
+      });
+      numero.addEventListener('blur', (e) => { e.target.value = normalize(e.target.value); });
+    }
+
+    // Form helpers
+    function resetForm(){
+      el('form').reset();
+      el('numero').value=''; el('problema').value=''; el('ajuste').value='';
+      el('validado').value='Sim'; el('fechado').value='Não';
+      el('data').value=todayISO(); el('hora').value=timeHM();
+      el('editingKey').value='';
+    }
+    function collectForm(){
+      const d = el('data').value || todayISO();
+      const h = el('hora').value || timeHM();
+      return {
+        numero: el('numero').value.trim(),
+        problema: el('problema').value.trim(),
+        ajuste: el('ajuste').value.trim(),
+        validado: el('validado').value,
+        fechado: el('fechado').value,
+        d, h,
+        datetime: new Date(`${d}T${h}:00`).toISOString()
+      };
+    }
+
+    // CRUD Firebase
+    async function upsertRow(evt){
+      evt.preventDefault();
+      const data = collectForm();
+      if(!data.numero || !data.problema || !data.ajuste){ alert('Preencha Número, Problema e Ajuste.'); return; }
+
+      const key = el('editingKey').value;
+      if(key){
+        // update
+        await update(ref(db, `${BASE_PATH}/${key}`), data);
+      }else{
+        // create
+        const newRef = push(ref(db, BASE_PATH));
+        await set(newRef, data);
+      }
+      closeModal();
+    }
+
+    async function editRow(i){
+      if(!await checkPassword()) return;
+      const r = state.rows[i];
+      openModal();
+      el('numero').value = r.numero; el('problema').value = r.problema; el('ajuste').value = r.ajuste;
+      el('validado').value = r.validado; el('fechado').value = r.fechado || 'Não';
+      el('data').value = r.d; el('hora').value = r.h;
+      el('editingKey').value = r._key;
+    }
+    window.editRow = editRow;
+
+    async function deleteRow(i){
+      if(!await checkPassword()) return;
+      if(!confirm('Remover este registro?')) return;
+      const r = state.rows[i];
+      await remove(ref(db, `${BASE_PATH}/${r._key}`));
+    }
+    window.deleteRow = deleteRow;
+
+    // Render
+    function render(){
+      el('today').textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
+
+      let rows = [...state.rows];
+      const {key, dir} = state.sort;
+      rows.sort((a,b)=>{
+        let va=a[key], vb=b[key];
+        if(key==='datetime'){ va = +new Date(va); vb = +new Date(vb); }
+        if(va<vb) return dir==='asc'?-1:1;
+        if(va>vb) return dir==='asc'?1:-1;
+        return 0;
+      });
+
+      el('kTotal').textContent = rows.length;
+      el('kValidados').textContent = rows.filter(r=>r.validado==='Sim').length;
+      el('kNao').textContent = rows.filter(r=>r.validado==='Não').length;
+
+      const tbody = el('tbody');
+      tbody.innerHTML = '';
+      if(rows.length===0){
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7; td.className='muted'; td.textContent = 'Sem registros para exibir.';
+        tr.appendChild(td); tbody.appendChild(tr);
+      }else{
+        rows.forEach((r,i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${escapeHtml(r.numero)}</strong></td>
+            <td>${escapeHtml(r.problema)}</td>
+            <td>${escapeHtml(r.ajuste)}</td>
+            <td>${r.validado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge b-no">Não</span>'}</td>
+            <td>${r.fechado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge">Não</span>'}</td>
+            <td><span class="muted">${fmtDate(r.datetime)}</span></td>
+            <td>
+              <div class="right">
+                <button onclick="editRow(${i})">Editar</button>
+                <button class="danger" onclick="deleteRow(${i})">Excluir</button>
+              </div>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    // Live sync (ouvir alterações em tempo real)
+    function attachRealtime(){
+      onValue(ref(db, BASE_PATH), (snap)=>{
+        const obj = snap.val() || {};
+        // transforma em array e preserva a chave para editar/deletar
+        state.rows = Object.entries(obj).map(([k,v])=>({ _key:k, ...v }));
+        render();
+      });
+    }
+
+    // Eventos UI
+    el('openFormBtn').addEventListener('click', openModal);
+    el('closeFormBtn').addEventListener('click', closeModal);
+    el('cancelBtn').addEventListener('click', closeModal);
+    el('modalBackdrop').addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+    el('form').addEventListener('submit', upsertRow);
+
+    function setupNumeroMaskInit(){ setupNumeroMask(); }
+
+    // Boot
+    setupNumeroMaskInit();
+    // login anônimo e, quando autenticado, conecta realtime
+    signInAnonymously(auth).then(()=> attachRealtime());
+  </script>
+</body>
+</html>
