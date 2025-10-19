@@ -337,29 +337,33 @@
       closeModal();
     }
 
-    async function editRow(i){
-      if(!await checkPassword()) return;
-      const r = state.rows[i];
-      openModal();
-      el('numero').value = r.numero;
-      el('usuario').value = r.usuario || 'Heberty Silva'; // fallback p/ registros antigos
-      el('problema').value = r.problema;
-      el('ajuste').value = r.ajuste;
-      el('validado').value = r.validado;
-      el('fechado').value = r.fechado || 'Não';
-      el('data').value = r.d;
-      el('hora').value = r.h;
-      el('editingKey').value = r._key;
-    }
-    window.editRow = editRow;
+    function getRowByKey(key){
+  return state.rows.find(r => r._key === key);
+}
 
-    async function deleteRow(i){
-      if(!await checkPassword()) return;
-      if(!confirm('Remover este registro?')) return;
-      const r = state.rows[i];
-      await remove(ref(db, `${BASE_PATH}/${r._key}`));
-    }
-    window.deleteRow = deleteRow;
+async function editRowByKey(key){
+  if(!await checkPassword()) return;
+  const r = getRowByKey(key);
+  if(!r) return;
+  openModal();
+  el('numero').value = r.numero;
+  el('usuario').value = r.usuario || 'Heberty Silva';
+  el('problema').value = r.problema;
+  el('ajuste').value = r.ajuste;
+  el('validado').value = r.validado;
+  el('fechado').value = r.fechado || 'Não';
+  el('data').value = r.d;
+  el('hora').value = r.h;
+  el('editingKey').value = r._key;
+}
+window.editRowByKey = editRowByKey;
+
+async function deleteRowByKey(key){
+  if(!await checkPassword()) return;
+  if(!confirm('Remover este registro?')) return;
+  await remove(ref(db, `${BASE_PATH}/${key}`));
+}
+window.deleteRowByKey = deleteRowByKey;
 
     // Ordenação ao clicar no header
     document.addEventListener('click', (e)=>{
@@ -410,24 +414,24 @@
         td.textContent = 'Sem registros para exibir.';
         tr.appendChild(td); tbody.appendChild(tr);
       }else{
-        rows.forEach((r,i)=>{
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${escapeHtml(r.numero)}</strong></td>
-            <td>${escapeHtml(r.usuario || '—')}</td>
-            <td>${escapeHtml(r.problema)}</td>
-            <td>${escapeHtml(r.ajuste)}</td>
-            <td>${r.validado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge b-no">Não</span>'}</td>
-            <td>${r.fechado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge">Não</span>'}</td>
-            <td><span class="muted">${fmtDate(r.datetime)}</span></td>
-            <td>
-              <div class="right">
-                <button onclick="editRow(${i})">Editar</button>
-                <button class="danger" onclick="deleteRow(${i})">Excluir</button>
-              </div>
-            </td>`;
-          tbody.appendChild(tr);
-        });
+        rows.forEach((r)=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><strong>${escapeHtml(r.numero)}</strong></td>
+    <td>${escapeHtml(r.usuario || '—')}</td>
+    <td>${escapeHtml(r.problema)}</td>
+    <td>${escapeHtml(r.ajuste)}</td>
+    <td>${r.validado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge b-no">Não</span>'}</td>
+    <td>${r.fechado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge">Não</span>'}</td>
+    <td><span class="muted">${fmtDate(r.datetime)}</span></td>
+    <td>
+      <div class="right">
+        <button onclick="editRowByKey('${r._key}')">Editar</button>
+        <button class="danger" onclick="deleteRowByKey('${r._key}')">Excluir</button>
+      </div>
+    </td>`;
+  tbody.appendChild(tr);
+});
       }
     }
 
