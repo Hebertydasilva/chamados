@@ -32,7 +32,7 @@
     button.ghost{background:transparent}
     .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
     .chip{background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:#ddd}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
     .stat{background:linear-gradient(180deg,var(--panel),#261b48);border:1px solid var(--border);border-radius:14px;padding:14px}
     .stat h3{margin:0;font-size:12px;color:var(--muted)}
     .stat p{margin:6px 0 0 0;font-size:22px;font-weight:800;color:#f5f3ff}
@@ -114,6 +114,8 @@
         <div class="stat"><h3>Total cadastrados</h3><p id="kTotal">0</p></div>
         <div class="stat"><h3>Validados com cliente</h3><p id="kValidados">0</p></div>
         <div class="stat"><h3>Não validados</h3><p id="kNao">0</p></div>
+        <div class="stat"><h3>Encerrados</h3><p id="kEncerrados">0</p></div>
+        <div class="stat"><h3>Não encerrados</h3><p id="kNaoEncerrados">0</p></div>
       </div>
     </section>
 
@@ -428,6 +430,8 @@ if (todayEl) {
       el('kTotal').textContent = rows.length;
       el('kValidados').textContent = rows.filter(r=>r.validado==='Sim').length;
       el('kNao').textContent = rows.filter(r=>r.validado==='Não').length;
+      el('kEncerrados').textContent = rows.filter(r => r.fechado === 'Sim').length;
+      el('kNaoEncerrados').textContent = rows.filter(r => r.fechado === 'Não').length;
 
       const tbody = el('tbody');
       tbody.innerHTML = '';
