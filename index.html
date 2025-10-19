@@ -36,13 +36,24 @@
     .stat{background:linear-gradient(180deg,var(--panel),#261b48);border:1px solid var(--border);border-radius:14px;padding:14px}
     .stat h3{margin:0;font-size:12px;color:var(--muted)}
     .stat p{margin:6px 0 0 0;font-size:22px;font-weight:800;color:#f5f3ff}
-    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+
+    /* Tabela fixa e quebra de palavras para evitar desalinhamento */
+    table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
     thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
     tbody tr{background:var(--card);border:1px solid var(--border)}
-    tbody td{padding:12px 10px;vertical-align:top}
+    tbody td{padding:12px 10px;vertical-align:top;word-break:break-word}
     tbody tr{border-radius:12px}
     tbody tr td:first-child{border-radius:12px 0 0 12px}
     tbody tr td:last-child{border-radius:0 12px 12px 0}
+
+    /* Clamp para limitar altura de Problema/Correção */
+    .clamp-4{
+      display:-webkit-box;
+      -webkit-line-clamp:4;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
     .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
     .b-ok{background:rgba(34,197,94,.15);color:#b7ffd9;border-color:#256f43}
     .b-no{background:rgba(239,68,68,.12);color:#ffc0c5;border-color:#7a2b32}
@@ -50,6 +61,7 @@
     .right{display:flex;gap:6px;justify-content:flex-end}
     .sortable{cursor:pointer}
     .sortable::after{content:" ⥯";opacity:.4}
+
     /* compacto Y */
     table.compact-rows{border-spacing:0 4px}
     table.compact-rows thead th{padding:0 8px;font-size:11px}
@@ -57,6 +69,7 @@
     table.compact-rows .badge{padding:2px 6px;font-size:11px}
     table.compact-rows .right{gap:4px}
     table.compact-rows .right button{padding:6px 10px;font-size:12px;border-radius:8px}
+
     /* modal */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}
     .modal.open{display:flex}
@@ -71,30 +84,30 @@
     .dialog.small{width:min(420px,94vw)}
     .error{font-size:12px;color:#ffe4e6;background:rgba(239,68,68,.12);border:1px solid #7a2b32;padding:6px 8px;border-radius:8px;display:none;margin-top:8px}
     .error.show{display:block}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} .stats{grid-template-columns:repeat(2,1fr)} }
 
-/* Ícone de copiar número de chamado */
-.numero-chamado {
-  position: relative;
-  cursor: pointer;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:repeat(2,1fr)}
+      .clamp-4{-webkit-line-clamp:3}
+    }
 
-.icon-copy {
-  width: 16px;
-  height: 16px;
-  margin-left: 6px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none; /* evita atrapalhar clique no número */
-}
-
-.numero-chamado:hover .icon-copy {
-  opacity: 1;
-}
-    
+    /* Ícone de copiar número de chamado */
+    .numero-chamado {
+      position: relative;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+    .icon-copy {
+      width: 16px;
+      height: 16px;
+      margin-left: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .numero-chamado:hover .icon-copy { opacity: 1; }
   </style>
 </head>
 <body>
@@ -122,6 +135,17 @@
     <section class="panel">
       <div style="overflow:auto">
         <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
+          <!-- Larguras fixas das colunas para manter alinhamento -->
+          <colgroup>
+            <col style="width:120px">   <!-- Nº chamado -->
+            <col style="width:140px">   <!-- Usuário -->
+            <col style="width:26%">     <!-- Problema -->
+            <col style="width:26%">     <!-- Correção -->
+            <col style="width:110px">   <!-- Validado? -->
+            <col style="width:120px">   <!-- Encerrado? -->
+            <col style="width:150px">   <!-- Data/Hora -->
+            <col style="width:110px">   <!-- Ações -->
+          </colgroup>
           <thead>
             <tr>
               <th class="sortable" data-key="numero">Nº chamado</th>
@@ -335,7 +359,7 @@
       const h = el('hora').value || timeHM();
       return {
         numero: el('numero').value.trim(),
-        usuario: el('usuario').value,                // << NOVO
+        usuario: el('usuario').value,
         problema: el('problema').value.trim(),
         ajuste: el('ajuste').value.trim(),
         validado: el('validado').value,
@@ -362,32 +386,32 @@
     }
 
     function getRowByKey(key){
-  return state.rows.find(r => r._key === key);
-}
+      return state.rows.find(r => r._key === key);
+    }
 
-async function editRowByKey(key){
-  if(!await checkPassword()) return;
-  const r = getRowByKey(key);
-  if(!r) return;
-  openModal();
-  el('numero').value = r.numero;
-  el('usuario').value = r.usuario || 'Heberty Silva';
-  el('problema').value = r.problema;
-  el('ajuste').value = r.ajuste;
-  el('validado').value = r.validado;
-  el('fechado').value = r.fechado || 'Não';
-  el('data').value = r.d;
-  el('hora').value = r.h;
-  el('editingKey').value = r._key;
-}
-window.editRowByKey = editRowByKey;
+    async function editRowByKey(key){
+      if(!await checkPassword()) return;
+      const r = getRowByKey(key);
+      if(!r) return;
+      openModal();
+      el('numero').value = r.numero;
+      el('usuario').value = r.usuario || 'Heberty Silva';
+      el('problema').value = r.problema;
+      el('ajuste').value = r.ajuste;
+      el('validado').value = r.validado;
+      el('fechado').value = r.fechado || 'Não';
+      el('data').value = r.d;
+      el('hora').value = r.h;
+      el('editingKey').value = r._key;
+    }
+    window.editRowByKey = editRowByKey;
 
-async function deleteRowByKey(key){
-  if(!await checkPassword()) return;
-  if(!confirm('Remover este registro?')) return;
-  await remove(ref(db, `${BASE_PATH}/${key}`));
-}
-window.deleteRowByKey = deleteRowByKey;
+    async function deleteRowByKey(key){
+      if(!await checkPassword()) return;
+      if(!confirm('Remover este registro?')) return;
+      await remove(ref(db, `${BASE_PATH}/${key}`));
+    }
+    window.deleteRowByKey = deleteRowByKey;
 
     // Ordenação ao clicar no header
     document.addEventListener('click', (e)=>{
@@ -406,19 +430,17 @@ window.deleteRowByKey = deleteRowByKey;
     // Render
     function render(){
       const todayEl = el('today');
-if (todayEl) {
-  todayEl.textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
-}
+      if (todayEl) {
+        todayEl.textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
+      }
 
       let rows = [...state.rows];
       const {key, dir} = state.sort;
       rows.sort((a,b)=>{
         let va=a[key], vb=b[key];
 
-        // datas
         if(key==='datetime'){ va = +new Date(va); vb = +new Date(vb); }
 
-        // strings: normalizar para case-insensitive (inclui 'usuario', 'problema', 'ajuste', etc.)
         if(typeof va === 'string') va = va.toLocaleLowerCase('pt-BR');
         if(typeof vb === 'string') vb = vb.toLocaleLowerCase('pt-BR');
 
@@ -438,44 +460,44 @@ if (todayEl) {
       if(rows.length===0){
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 8; /* agora são 8 colunas */
+        td.colSpan = 8;
         td.className='muted';
         td.textContent = 'Sem registros para exibir.';
         tr.appendChild(td); tbody.appendChild(tr);
       }else{
         rows.forEach((r)=>{
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-  <td>
-    <span class="numero-chamado" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
-      ${escapeHtml(r.numero)}
-      <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/15430/15430295.png"
-           alt="Copiar número" title="Copiar" width="16" height="16">
-    </span>
-  </td>
-  <td>${escapeHtml(r.usuario || '—')}</td>
-  <td>${escapeHtml(r.problema)}</td>
-  <td>${escapeHtml(r.ajuste)}</td>
-  <td>${r.validado==='Sim'
-        ? '<span class="badge b-ok">Sim</span>'
-        : '<span class="badge b-no">Não</span>'}</td>
-  <td>${r.fechado==='Sim'
-        ? '<span class="badge b-ok">Sim</span>'
-        : '<span class="badge">Não</span>'}</td>
-  <td><span class="muted">${fmtDate(r.datetime)}</span></td>
-  <td>
-    <div class="right">
-      <button onclick="editRowByKey('${r._key}')" title="Editar" aria-label="Editar">
-        <img src="https://cdn-icons-png.flaticon.com/512/7757/7757615.png" alt="Editar" width="18" height="18">
-      </button>
-      <button class="danger" onclick="deleteRowByKey('${r._key}')" title="Excluir" aria-label="Excluir">
-        <img src="https://cdn-icons-png.flaticon.com/512/656/656857.png" alt="Excluir" width="18" height="18">
-      </button>
-    </div>
-  </td>
-`;
-  tbody.appendChild(tr);
-});
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <span class="numero-chamado" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
+                ${escapeHtml(r.numero)}
+                <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/15430/15430295.png"
+                     alt="Copiar número" title="Copiar" width="16" height="16">
+              </span>
+            </td>
+            <td>${escapeHtml(r.usuario || '—')}</td>
+            <td><div class="clamp-4" title="${escapeHtml(r.problema)}">${escapeHtml(r.problema)}</div></td>
+            <td><div class="clamp-4" title="${escapeHtml(r.ajuste)}">${escapeHtml(r.ajuste)}</div></td>
+            <td>${r.validado==='Sim'
+                  ? '<span class="badge b-ok">Sim</span>'
+                  : '<span class="badge b-no">Não</span>'}</td>
+            <td>${r.fechado==='Sim'
+                  ? '<span class="badge b-ok">Sim</span>'
+                  : '<span class="badge">Não</span>'}</td>
+            <td><span class="muted">${fmtDate(r.datetime)}</span></td>
+            <td>
+              <div class="right">
+                <button onclick="editRowByKey('${r._key}')" title="Editar" aria-label="Editar">
+                  <img src="https://cdn-icons-png.flaticon.com/512/7757/7757615.png" alt="Editar" width="18" height="18">
+                </button>
+                <button class="danger" onclick="deleteRowByKey('${r._key}')" title="Excluir" aria-label="Excluir">
+                  <img src="https://cdn-icons-png.flaticon.com/512/656/656857.png" alt="Excluir" width="18" height="18">
+                </button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
     }
 
