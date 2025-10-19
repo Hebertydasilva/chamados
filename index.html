@@ -427,9 +427,15 @@ window.deleteRowByKey = deleteRowByKey;
     <td><span class="muted">${fmtDate(r.datetime)}</span></td>
     <td>
       <div class="right">
-        <button onclick="editRowByKey('${r._key}')">Editar</button>
-        <button class="danger" onclick="deleteRowByKey('${r._key}')">Excluir</button>
-      </div>
+  <button onclick="editRowByKey('${r._key}')" title="Editar" aria-label="Editar">
+    <img src="https://cdn-icons-png.flaticon.com/512/2444/2444472.png"
+         alt="Editar" width="18" height="18">
+  </button>
+  <button class="danger" onclick="deleteRowByKey('${r._key}')" title="Excluir" aria-label="Excluir">
+    <img src="https://cdn-icons-png.flaticon.com/512/2444/2444466.png"
+         alt="Excluir" width="18" height="18">
+  </button>
+</div>
     </td>`;
   tbody.appendChild(tr);
 });
