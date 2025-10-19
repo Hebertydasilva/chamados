@@ -380,7 +380,10 @@ window.deleteRowByKey = deleteRowByKey;
 
     // Render
     function render(){
-      el('today').textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
+      const todayEl = el('today');
+if (todayEl) {
+  todayEl.textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
+}
 
       let rows = [...state.rows];
       const {key, dir} = state.sort;
