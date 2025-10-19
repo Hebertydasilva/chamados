@@ -20,7 +20,7 @@
     .title{font-size:clamp(18px,2.5vw,28px);font-weight:800;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:12px}
     .panel{background:linear-gradient(180deg,var(--panel),#271c49);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-    /* AGORA COM 6 COLUNAS NO FORM */
+    /* 6 colunas no form */
     .grid{display:grid;grid-template-columns:1fr 1fr .8fr .8fr .8fr .7fr;gap:10px}
     label{font-size:12px;color:var(--muted)}
     input,textarea,select{width:100%;border:1px solid var(--border);background:#221843;color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
@@ -32,12 +32,14 @@
     button.ghost{background:transparent}
     .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
     .chip{background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:#ddd}
+
+    /* Cards de estatística */
     .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
     .stat{background:linear-gradient(180deg,var(--panel),#261b48);border:1px solid var(--border);border-radius:14px;padding:14px}
     .stat h3{margin:0;font-size:12px;color:var(--muted)}
     .stat p{margin:6px 0 0 0;font-size:22px;font-weight:800;color:#f5f3ff}
 
-    /* Tabela fixa e quebra de palavras para evitar desalinhamento */
+    /* Tabela com larguras fixas e quebra de palavras */
     table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
     thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
     tbody tr{background:var(--card);border:1px solid var(--border)}
@@ -46,12 +48,12 @@
     tbody tr td:first-child{border-radius:12px 0 0 12px}
     tbody tr td:last-child{border-radius:0 12px 12px 0}
 
-    /* Clamp para limitar altura de Problema/Correção */
-    .clamp-4{
-      display:-webkit-box;
-      -webkit-line-clamp:4;
-      -webkit-box-orient:vertical;
-      overflow:hidden;
+    /* Células de texto longo: mostrar tudo, com quebras */
+    .wrap-cell{
+      white-space:pre-wrap;        /* respeita \n e quebra linhas */
+      overflow-wrap:anywhere;      /* quebra palavras muito longas */
+      word-break:normal;           /* não quebrar agressivo se não precisar */
+      hyphens:auto;                /* hifenização quando aplicável */
     }
 
     .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
@@ -88,7 +90,6 @@
     @media (max-width:900px){
       .grid{grid-template-columns:1fr}
       .stats{grid-template-columns:repeat(2,1fr)}
-      .clamp-4{-webkit-line-clamp:3}
     }
 
     /* Ícone de copiar número de chamado */
@@ -135,7 +136,7 @@
     <section class="panel">
       <div style="overflow:auto">
         <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
-          <!-- Larguras fixas das colunas para manter alinhamento -->
+          <!-- Colunas com larguras fixas para manter alinhamento -->
           <colgroup>
             <col style="width:120px">   <!-- Nº chamado -->
             <col style="width:140px">   <!-- Usuário -->
@@ -155,7 +156,7 @@
               <th class="sortable" data-key="validado">Validado?</th>
               <th class="sortable" data-key="fechado">Encerrado?</th>
               <th class="sortable" data-key="datetime">Data/Hora</th>
-              <th>Ações</th>
+              <th class="sortable" data-key="datetime">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -180,7 +181,6 @@
                    inputmode="numeric" maxlength="10" autocomplete="off" />
           </div>
 
-          <!-- NOVO CAMPO: USUÁRIO -->
           <div>
             <label for="usuario">Usuário *</label>
             <select id="usuario" required>
@@ -240,7 +240,7 @@
       </header>
       <div>
         <label for="pwInput">Senha:</label>
-        <input id="pwInput" type="password" placeholder="••••••••••" autocomplete="current-password" maxlength="10" />
+        <input id="pwInput" type="password" placeholder="••••" autocomplete="current-password" maxlength="10" />
         <div id="pwError" class="error">Senha incorreta.</div>
       </div>
       <div class="actions" style="margin-top:12px">
@@ -274,25 +274,20 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Caminho compartilhado (troque "public" se quiser separar por equipe)
     const BASE_PATH = 'orgs/public/chamados';
 
-    // Estado
     const el = (id)=>document.getElementById(id);
     const state = { rows: [], sort:{key:'datetime', dir:'desc'} };
-    const EDIT_PASSWORD = '1234'; // ajuste se quiser
+    const EDIT_PASSWORD = '1234';
 
-    // Utils
     const todayISO = () => new Date().toISOString().split('T')[0];
     const timeHM = () => { const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
     const fmtDate = (iso) => { try{ return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) }catch{ return '-' } }
     const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 
-    // Modal formulário
     function openModal(){ const m = el('formModal'); m.classList.add('open'); document.body.classList.add('modal-open'); resetForm(); el('numero').focus(); }
     function closeModal(){ const m = el('formModal'); m.classList.remove('open'); document.body.classList.remove('modal-open'); }
 
-    // Modal senha
     function openPwModal(){ const m = el('pwModal'); m.classList.add('open'); document.body.classList.add('modal-open'); el('pwInput').value=''; el('pwError').classList.remove('show'); setTimeout(()=>el('pwInput').focus(), 0); }
     function closePwModal(){ const m = el('pwModal'); m.classList.remove('open'); document.body.classList.remove('modal-open'); }
     function askPassword(){
@@ -317,7 +312,6 @@
     }
     async function checkPassword(){ return await askPassword(); }
 
-    // Máscara do Número do chamado
     function setupNumeroMask(){
       const numero = el('numero');
       const normalize = (raw) => {
@@ -340,11 +334,10 @@
       numero.addEventListener('blur', (e) => { e.target.value = normalize(e.target.value); });
     }
 
-    // Form helpers
     function resetForm(){
       el('form').reset();
       el('numero').value='';
-      el('usuario').value='Heberty Silva'; // default
+      el('usuario').value='Heberty Silva';
       el('problema').value='';
       el('ajuste').value='';
       el('validado').value='Sim';
@@ -369,7 +362,6 @@
       };
     }
 
-    // CRUD Firebase
     async function upsertRow(evt){
       evt.preventDefault();
       const data = collectForm();
@@ -385,9 +377,7 @@
       closeModal();
     }
 
-    function getRowByKey(key){
-      return state.rows.find(r => r._key === key);
-    }
+    function getRowByKey(key){ return state.rows.find(r => r._key === key); }
 
     async function editRowByKey(key){
       if(!await checkPassword()) return;
@@ -429,21 +419,13 @@
 
     // Render
     function render(){
-      const todayEl = el('today');
-      if (todayEl) {
-        todayEl.textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
-      }
-
       let rows = [...state.rows];
       const {key, dir} = state.sort;
       rows.sort((a,b)=>{
         let va=a[key], vb=b[key];
-
         if(key==='datetime'){ va = +new Date(va); vb = +new Date(vb); }
-
         if(typeof va === 'string') va = va.toLocaleLowerCase('pt-BR');
         if(typeof vb === 'string') vb = vb.toLocaleLowerCase('pt-BR');
-
         if(va<vb) return dir==='asc'?-1:1;
         if(va>vb) return dir==='asc'?1:-1;
         return 0;
@@ -471,13 +453,12 @@
             <td>
               <span class="numero-chamado" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
                 ${escapeHtml(r.numero)}
-                <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/15430/15430295.png"
-                     alt="Copiar número" title="Copiar" width="16" height="16">
+                <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/15430/15430295.png" alt="Copiar número" title="Copiar" width="16" height="16">
               </span>
             </td>
             <td>${escapeHtml(r.usuario || '—')}</td>
-            <td><div class="clamp-4" title="${escapeHtml(r.problema)}">${escapeHtml(r.problema)}</div></td>
-            <td><div class="clamp-4" title="${escapeHtml(r.ajuste)}">${escapeHtml(r.ajuste)}</div></td>
+            <td><div class="wrap-cell">${escapeHtml(r.problema)}</div></td>
+            <td><div class="wrap-cell">${escapeHtml(r.ajuste)}</div></td>
             <td>${r.validado==='Sim'
                   ? '<span class="badge b-ok">Sim</span>'
                   : '<span class="badge b-no">Não</span>'}</td>
@@ -501,7 +482,6 @@
       }
     }
 
-    // Live sync (ouvir alterações em tempo real)
     function attachRealtime(){
       onValue(ref(db, BASE_PATH), (snap)=>{
         const obj = snap.val() || {};
@@ -518,10 +498,8 @@
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
     el('form').addEventListener('submit', upsertRow);
 
-    function setupNumeroMaskInit(){ setupNumeroMask(); }
-
     // Boot
-    setupNumeroMaskInit();
+    setupNumeroMask();
     attachRealtime();
   </script>
 </body>
