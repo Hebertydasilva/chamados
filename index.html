@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -19,7 +19,8 @@
     .title{font-size:clamp(18px,2.5vw,28px);font-weight:800;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:12px}
     .panel{background:linear-gradient(180deg,var(--panel),#271c49);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-    .grid{display:grid;grid-template-columns:1.1fr 1.1fr .8fr .8fr .7fr;gap:10px}
+    /* AGORA COM 6 COLUNAS NO FORM */
+    .grid{display:grid;grid-template-columns:1fr 1fr .8fr .8fr .8fr .7fr;gap:10px}
     label{font-size:12px;color:var(--muted)}
     input,textarea,select{width:100%;border:1px solid var(--border);background:#221843;color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
     input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(6,182,212,.15)}
@@ -81,7 +82,7 @@
       </div>
       <div class="chips">
         <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
-		  <span class="chip">Local • <span id="today"></span></span>
+        <span class="chip">Local • <span id="today"></span></span>
         <span class="chip" id="storageChip">Armazenamento: <strong>Firebase</strong></span>
       </div>
     </header>
@@ -100,6 +101,7 @@
           <thead>
             <tr>
               <th class="sortable" data-key="numero">Nº chamado</th>
+              <th class="sortable" data-key="usuario">Usuário</th>
               <th class="sortable" data-key="problema">Problema de config</th>
               <th class="sortable" data-key="ajuste">Ajuste feito</th>
               <th class="sortable" data-key="validado">Validado?</th>
@@ -129,6 +131,16 @@
             <input id="numero" required placeholder="Ex.: 0958892025"
                    inputmode="numeric" maxlength="10" autocomplete="off" />
           </div>
+
+          <!-- NOVO CAMPO: USUÁRIO -->
+          <div>
+            <label for="usuario">Usuário *</label>
+            <select id="usuario" required>
+              <option value="Heberty Silva">Heberty Silva</option>
+              <option value="Heberty Silva 2">Heberty Silva 2</option>
+            </select>
+          </div>
+
           <div>
             <label for="validado">Validado com cliente? *</label>
             <select id="validado" required>
@@ -151,6 +163,7 @@
             <label for="hora">Hora</label>
             <input id="hora" type="time" />
           </div>
+
           <div style="grid-column:1/-1">
             <label for="problema">Problema de configuração *</label>
             <textarea id="problema" required></textarea>
@@ -205,7 +218,7 @@
       storageBucket: "teste0109-6f255.appspot.com",
       messagingSenderId: "431927631481",
       appId: "1:431927631481:web:946543ab893d6a6b6d582a8",
-	  measurementId: "G-SCCKP9W9HK"
+      measurementId: "G-SCCKP9W9HK"
     };
     // ----------------------------------------------------------------------
 
@@ -282,16 +295,23 @@
     // Form helpers
     function resetForm(){
       el('form').reset();
-      el('numero').value=''; el('problema').value=''; el('ajuste').value='';
-      el('validado').value='Sim'; el('fechado').value='Não';
-      el('data').value=todayISO(); el('hora').value=timeHM();
+      el('numero').value='';
+      el('usuario').value='Heberty Silva'; // default
+      el('problema').value='';
+      el('ajuste').value='';
+      el('validado').value='Sim';
+      el('fechado').value='Não';
+      el('data').value=todayISO();
+      el('hora').value=timeHM();
       el('editingKey').value='';
     }
+
     function collectForm(){
       const d = el('data').value || todayISO();
       const h = el('hora').value || timeHM();
       return {
         numero: el('numero').value.trim(),
+        usuario: el('usuario').value,                // << NOVO
         problema: el('problema').value.trim(),
         ajuste: el('ajuste').value.trim(),
         validado: el('validado').value,
@@ -309,10 +329,8 @@
 
       const key = el('editingKey').value;
       if(key){
-        // update
         await update(ref(db, `${BASE_PATH}/${key}`), data);
       }else{
-        // create
         const newRef = push(ref(db, BASE_PATH));
         await set(newRef, data);
       }
@@ -323,9 +341,14 @@
       if(!await checkPassword()) return;
       const r = state.rows[i];
       openModal();
-      el('numero').value = r.numero; el('problema').value = r.problema; el('ajuste').value = r.ajuste;
-      el('validado').value = r.validado; el('fechado').value = r.fechado || 'Não';
-      el('data').value = r.d; el('hora').value = r.h;
+      el('numero').value = r.numero;
+      el('usuario').value = r.usuario || 'Heberty Silva'; // fallback p/ registros antigos
+      el('problema').value = r.problema;
+      el('ajuste').value = r.ajuste;
+      el('validado').value = r.validado;
+      el('fechado').value = r.fechado || 'Não';
+      el('data').value = r.d;
+      el('hora').value = r.h;
       el('editingKey').value = r._key;
     }
     window.editRow = editRow;
@@ -338,6 +361,20 @@
     }
     window.deleteRow = deleteRow;
 
+    // Ordenação ao clicar no header
+    document.addEventListener('click', (e)=>{
+      const th = e.target.closest('th.sortable');
+      if(!th) return;
+      const k = th.dataset.key;
+      if(!k) return;
+      if(state.sort.key === k){
+        state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
+      }else{
+        state.sort.key = k; state.sort.dir = 'asc';
+      }
+      render();
+    });
+
     // Render
     function render(){
       el('today').textContent = new Date().toLocaleString('pt-BR', { dateStyle:'long', timeStyle:'short' });
@@ -346,7 +383,14 @@
       const {key, dir} = state.sort;
       rows.sort((a,b)=>{
         let va=a[key], vb=b[key];
+
+        // datas
         if(key==='datetime'){ va = +new Date(va); vb = +new Date(vb); }
+
+        // strings: normalizar para case-insensitive (inclui 'usuario', 'problema', 'ajuste', etc.)
+        if(typeof va === 'string') va = va.toLocaleLowerCase('pt-BR');
+        if(typeof vb === 'string') vb = vb.toLocaleLowerCase('pt-BR');
+
         if(va<vb) return dir==='asc'?-1:1;
         if(va>vb) return dir==='asc'?1:-1;
         return 0;
@@ -361,13 +405,16 @@
       if(rows.length===0){
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 7; td.className='muted'; td.textContent = 'Sem registros para exibir.';
+        td.colSpan = 8; /* agora são 8 colunas */
+        td.className='muted';
+        td.textContent = 'Sem registros para exibir.';
         tr.appendChild(td); tbody.appendChild(tr);
       }else{
         rows.forEach((r,i)=>{
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${escapeHtml(r.numero)}</strong></td>
+            <td>${escapeHtml(r.usuario || '—')}</td>
             <td>${escapeHtml(r.problema)}</td>
             <td>${escapeHtml(r.ajuste)}</td>
             <td>${r.validado==='Sim'?'<span class="badge b-ok">Sim</span>':'<span class="badge b-no">Não</span>'}</td>
@@ -388,7 +435,6 @@
     function attachRealtime(){
       onValue(ref(db, BASE_PATH), (snap)=>{
         const obj = snap.val() || {};
-        // transforma em array e preserva a chave para editar/deletar
         state.rows = Object.entries(obj).map(([k,v])=>({ _key:k, ...v }));
         render();
       });
@@ -406,7 +452,7 @@
 
     // Boot
     setupNumeroMaskInit();
-    attachRealtime();   // <- registra o onValue agora
+    attachRealtime();
   </script>
 </body>
 </html>
