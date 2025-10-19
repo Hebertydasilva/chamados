@@ -72,6 +72,29 @@
     .error{font-size:12px;color:#ffe4e6;background:rgba(239,68,68,.12);border:1px solid #7a2b32;padding:6px 8px;border-radius:8px;display:none;margin-top:8px}
     .error.show{display:block}
     @media (max-width:900px){ .grid{grid-template-columns:1fr} .stats{grid-template-columns:repeat(2,1fr)} }
+
+/* Ícone de copiar número de chamado */
+.numero-chamado {
+  position: relative;
+  cursor: pointer;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon-copy {
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none; /* evita atrapalhar clique no número */
+}
+
+.numero-chamado:hover .icon-copy {
+  opacity: 1;
+}
+    
   </style>
 </head>
 <body>
@@ -421,9 +444,9 @@ if (todayEl) {
   tr.innerHTML = `
     <td>
   <td>
-  <span class="copy-wrap" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
-    <strong>${escapeHtml(r.numero)}</strong>
-    <img class="copy-icon" src="https://cdn-icons-png.flaticon.com/512/11669/11669909.png"
+  <span class="numero-chamado" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
+    ${escapeHtml(r.numero)}
+    <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/11669/11669909.png"
          alt="Copiar número" title="Copiar"
          width="16" height="16">
   </span>
