@@ -420,13 +420,14 @@ if (todayEl) {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td>
-  <strong
-    title="Copiar"
-    style="cursor:pointer"
-    onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')"
-  >
-    ${escapeHtml(r.numero)}
-  </strong>
+  <td>
+  <span class="copy-wrap" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
+    <strong>${escapeHtml(r.numero)}</strong>
+    <img class="copy-icon" src="https://cdn-icons-png.flaticon.com/512/11669/11669909.png"
+         alt="Copiar número" title="Copiar"
+         width="16" height="16">
+  </span>
+</td>
 </td>
     <td>${escapeHtml(r.usuario || '—')}</td>
     <td>${escapeHtml(r.problema)}</td>
