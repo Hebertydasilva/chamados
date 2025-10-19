@@ -418,7 +418,15 @@ window.deleteRowByKey = deleteRowByKey;
         rows.forEach((r)=>{
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><strong>${escapeHtml(r.numero)}</strong></td>
+    <td>
+  <strong
+    title="Copiar"
+    style="cursor:pointer"
+    onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')"
+  >
+    ${escapeHtml(r.numero)}
+  </strong>
+</td>
     <td>${escapeHtml(r.usuario || '—')}</td>
     <td>${escapeHtml(r.problema)}</td>
     <td>${escapeHtml(r.ajuste)}</td>
