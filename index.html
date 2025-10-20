@@ -41,40 +41,12 @@
 
     /* Tabela com larguras fixas e quebra de palavras */
     table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
+    thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
     tbody tr{background:var(--card);border:1px solid var(--border)}
     tbody td{padding:12px 10px;vertical-align:top;word-break:break-word}
     tbody tr{border-radius:12px}
     tbody tr td:first-child{border-radius:12px 0 0 12px}
     tbody tr td:last-child{border-radius:0 12px 12px 0}
-
-    /* ===== Cabeçalho da tabela melhorado ===== */
-    thead th{
-      position: sticky;           /* fixa no topo ao rolar */
-      top: 0;
-      z-index: 2;
-      padding: 10px 12px;
-      text-align: left;
-      font-size: 12px;
-      letter-spacing: .3px;
-      color: #cfcfe6;
-      background: linear-gradient(180deg,#2b2050,#251b44);
-      border: 1px solid var(--border);
-      border-bottom-color: #3b2f63;
-      box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
-    }
-    thead th:first-child{border-radius:12px 0 0 12px}
-    thead th:last-child{border-radius:0 12px 12px 0}
-
-    /* indicador de ordenação */
-    th.sortable{cursor:pointer}
-    th.sortable::after{
-      content:" ⬍";
-      opacity:.45;
-      margin-left:4px;
-      font-size:11px;
-    }
-    th.sortable[data-dir="asc"]::after{content:" ▲";opacity:.9}
-    th.sortable[data-dir="desc"]::after{content:" ▼";opacity:.9}
 
     /* Células de texto longo: mostrar tudo, com quebras */
     .wrap-cell{
@@ -89,10 +61,12 @@
     .b-no{background:rgba(239,68,68,.12);color:#ffc0c5;border-color:#7a2b32}
     .muted{color:var(--muted)}
     .right{display:flex;gap:6px;justify-content:flex-end}
+    .sortable{cursor:pointer}
+    .sortable::after{content:" ⥯";opacity:.4}
 
     /* compacto Y */
     table.compact-rows{border-spacing:0 4px}
-    table.compact-rows thead th{padding:10px 12px;font-size:11px}
+    table.compact-rows thead th{padding:0 8px;font-size:11px}
     table.compact-rows tbody td{padding:6px 8px;font-size:13px;line-height:1.15}
     table.compact-rows .badge{padding:2px 6px;font-size:11px}
     table.compact-rows .right{gap:4px}
@@ -119,19 +93,39 @@
     }
 
     /* Ícone de copiar número de chamado */
-    .numero-chamado { position: relative; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; }
-    .icon-copy { width: 16px; height: 16px; margin-left: 6px; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+    .numero-chamado {
+      position: relative;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+    .icon-copy {
+      width: 16px;
+      height: 16px;
+      margin-left: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
     .numero-chamado:hover .icon-copy { opacity: 1; }
 
-    /* Centralizar conteúdo das colunas Validado? (5ª) e Encerrado? (6ª) */
-    tbody td:nth-child(5),
-    tbody td:nth-child(6),
-    thead th:nth-child(5),
-    thead th:nth-child(6) { text-align: center; }
+/* Centralizar conteúdo das colunas Validado? (5ª) e Encerrado? (6ª) */
+  tbody td:nth-child(5),
+  tbody td:nth-child(6),
+  thead th:nth-child(5),
+  thead th:nth-child(6) {
+    text-align: center;
+  }
 
-    /* garante que o badge fique bem no centro */
-    tbody td:nth-child(5) .badge,
-    tbody td:nth-child(6) .badge { display: inline-block; }
+  /* Opcional: garante que o badge fique bem no centro */
+  tbody td:nth-child(5) .badge,
+  tbody td:nth-child(6) .badge {
+    display: inline-block;
+  }
+
+
+    
   </style>
 </head>
 <body>
@@ -161,25 +155,25 @@
         <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
           <!-- Colunas com larguras fixas para manter alinhamento -->
           <colgroup>
-            <col style="width:120px">   <!-- Nº chamado -->
-            <col style="width:110px">   <!-- Usuário -->
-            <col style="width:35%">     <!-- Problema -->
-            <col style="width:35%">     <!-- Correção -->
-            <col style="width:90px">    <!-- Validado? -->
-            <col style="width:100px">   <!-- Encerrado? -->
-            <col style="width:120px">   <!-- Data/Hora -->
-            <col style="width:90px">    <!-- Ações -->
-          </colgroup>
+  <col style="width:120px">   <!-- Nº chamado (↑ para não quebrar) -->
+  <col style="width:110px">   <!-- Usuário -->
+  <col style="width:35%">     <!-- Problema -->
+  <col style="width:35%">     <!-- Correção -->
+  <col style="width:90px">    <!-- Validado? -->
+  <col style="width:100px">   <!-- Encerrado? -->
+  <col style="width:120px">   <!-- Data/Hora -->
+  <col style="width:90px">    <!-- Ações -->
+</colgroup>
           <thead>
             <tr>
-              <th class="sortable" data-key="numero"   aria-sort="none">Nº chamado</th>
-              <th class="sortable" data-key="usuario"  aria-sort="none">Usuário</th>
-              <th class="sortable" data-key="problema" aria-sort="none">Problema</th>
-              <th class="sortable" data-key="ajuste"   aria-sort="none">Correção</th>
-              <th class="sortable" data-key="validado" aria-sort="none">Validado?</th>
-              <th class="sortable" data-key="fechado"  aria-sort="none">Encerrado?</th>
-              <th class="sortable" data-key="datetime" aria-sort="none">Data/Hora</th>
-              <th class="sortable" data-key="datetime" aria-sort="none">Ações</th>
+              <th class="sortable" data-key="numero">Nº chamado</th>
+              <th class="sortable" data-key="usuario">Usuário</th>
+              <th class="sortable" data-key="problema">Problema</th>
+              <th class="sortable" data-key="ajuste">Correção</th>
+              <th class="sortable" data-key="validado">Validado?</th>
+              <th class="sortable" data-key="fechado">Encerrado?</th>
+              <th class="sortable" data-key="datetime">Data/Hora</th>
+              <th class="sortable" data-key="datetime">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -425,29 +419,17 @@
     }
     window.deleteRowByKey = deleteRowByKey;
 
-    // Ordenação ao clicar no header (com setas ▲/▼ e aria-sort)
+    // Ordenação ao clicar no header
     document.addEventListener('click', (e)=>{
       const th = e.target.closest('th.sortable');
       if(!th) return;
-
       const k = th.dataset.key;
       if(!k) return;
-
       if(state.sort.key === k){
-        state.sort.dir = (state.sort.dir === 'asc') ? 'desc' : 'asc';
+        state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
       }else{
-        state.sort.key = k;
-        state.sort.dir = 'asc';
+        state.sort.key = k; state.sort.dir = 'asc';
       }
-
-      // limpa indicadores e marca o ativo
-      document.querySelectorAll('thead th.sortable').forEach(h=>{
-        h.removeAttribute('data-dir');
-        h.setAttribute('aria-sort','none');
-      });
-      th.setAttribute('data-dir', state.sort.dir);
-      th.setAttribute('aria-sort', state.sort.dir === 'asc' ? 'ascending' : 'descending');
-
       render();
     });
 
@@ -517,8 +499,6 @@
     }
 
     function attachRealtime(){
-      // login anônimo (necessário se o RTDB estiver exigindo auth)
-      signInAnonymously(auth).catch(()=>{});
       onValue(ref(db, BASE_PATH), (snap)=>{
         const obj = snap.val() || {};
         state.rows = Object.entries(obj).map(([k,v])=>({ _key:k, ...v }));
@@ -533,6 +513,7 @@
     el('modalBackdrop').addEventListener('click', closeModal);
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
     el('form').addEventListener('submit', upsertRow);
+
 
     // Boot
     setupNumeroMask();
