@@ -6,73 +6,140 @@
   <title>Chamados Resolvidos</title>
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/8296/8296497.png">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
     :root{
-      --bg:#241a3b; --bg2:#1d1530; --panel:#2e2152; --card:#2a1e4a; --border:#3b2f63;
-      --text:#e4e4e7; --muted:#a1a1aa;
+      --bg:#241a3b; --bg2:#1b1233; --panel:#2c1f4f; --card:#241a44; --border:#3b2f63;
+      --text:#e7e7ef; --muted:#b2b2bc;
       --primary:#8b5cf6; --primary-2:#7c3aed; --accent:#06b6d4;
       --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
-      --chip:#3a2e61; --shadow:0 12px 28px rgba(0,0,0,.45);
+      --chip:#3a2e61; --shadow:0 14px 30px rgba(0,0,0,.45);
+      --row:#251b46; --row-hover:#2b1f53;
+      --thead:#2a1f4f;
+      --glass:rgba(255,255,255,.06);
+      --ring:0 0 0 2px rgba(6,182,212,.15);
     }
+
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2) 70%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45}
-    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
-    header{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:16px}
-    .title{font-size:clamp(18px,2.5vw,28px);font-weight:800;letter-spacing:.3px}
-    .subtitle{color:var(--muted);font-size:12px}
-    .panel{background:linear-gradient(180deg,var(--panel),#271c49);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-    /* 6 colunas no form */
-    .grid{display:grid;grid-template-columns:1fr 1fr .8fr .8fr .8fr .7fr;gap:10px}
-    label{font-size:12px;color:var(--muted)}
-    input,textarea,select{width:100%;border:1px solid var(--border);background:#221843;color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;outline:none}
-    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(6,182,212,.15)}
-    textarea{min-height:64px;resize:vertical}
-    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    button{border:1px solid var(--border);background:#23194a;color:var(--text);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
-    button.primary{background:linear-gradient(90deg,var(--primary),var(--primary-2));color:#0b041a;border:0}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(124,58,237,.18), transparent 60%),
+        radial-gradient(1400px 800px at 110% -20%, rgba(6,182,212,.12), transparent 60%),
+        linear-gradient(180deg,var(--bg),var(--bg2) 70%);
+      color:var(--text);
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.45;
+    }
+
+    .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
+
+    header{
+      display:grid;grid-template-columns:1fr auto;gap:16px;align-items:end;margin-bottom:16px
+    }
+    .title{
+      font-size:clamp(20px,2.7vw,32px);
+      font-weight:800;letter-spacing:.3px;
+      display:flex;align-items:center;gap:10px
+    }
+    .title .pill{
+      font-size:12px;color:#12101a;background:linear-gradient(90deg,var(--primary),var(--primary-2));
+      padding:4px 8px;border-radius:999px;font-weight:700;letter-spacing:.3px
+    }
+    .subtitle{color:var(--muted);font-size:12px;margin-top:4px}
+
+    .panel{
+      background:linear-gradient(180deg,var(--panel),#241a44);
+      border:1px solid var(--border);border-radius:16px;padding:16px;
+      box-shadow:var(--shadow)
+    }
+
+    /* Barra de ações */
+    .toolbar{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end;margin-top:8px
+    }
+    .search{
+      position:relative;min-width:220px
+    }
+    .search input{
+      width:100%;border:1px solid var(--border);background:#211843;
+      color:var(--text);border-radius:999px;padding:10px 36px 10px 36px;font-size:14px;outline:none;
+      box-shadow:inset 0 0 0 1px var(--glass)
+    }
+    .search .icon{
+      position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.7;width:16px;height:16px
+    }
+    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .chip{
+      background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:#ddd
+    }
+
+    /* Botões */
+    button{
+      border:1px solid var(--border);
+      background:#23194a;color:var(--text);
+      padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;transition:transform .08s ease,opacity .15s ease,background .15s ease
+    }
+    button.primary{
+      background:linear-gradient(90deg,var(--primary),var(--primary-2));color:#0b041a;border:0
+    }
     button.ghost{background:transparent}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-    .chip{background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:#ddd}
+    button:active{transform:translateY(1px)}
 
     /* Cards de estatística */
     .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
-    .stat{background:linear-gradient(180deg,var(--panel),#261b48);border:1px solid var(--border);border-radius:14px;padding:14px}
-    .stat h3{margin:0;font-size:12px;color:var(--muted)}
+    .stat{
+      background:linear-gradient(180deg,var(--panel),#261b48);
+      border:1px solid var(--border);border-radius:14px;padding:14px;position:relative;overflow:hidden
+    }
+    .stat::after{
+      content:"";position:absolute;right:-20px;top:-20px;width:100px;height:100px;border-radius:50%;
+      background:radial-gradient(closest-side,rgba(255,255,255,.08),transparent 70%)
+    }
+    .stat h3{margin:0;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+    .stat h3 .dot{width:8px;height:8px;border-radius:999px;background:var(--glass);display:inline-block}
     .stat p{margin:6px 0 0 0;font-size:22px;font-weight:800;color:#f5f3ff}
 
-    /* Tabela com larguras fixas e quebra de palavras */
+    /* Tabela */
     table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
-    thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
-    tbody tr{background:var(--card);border:1px solid var(--border)}
+    thead th{
+      position:sticky;top:0;z-index:2;
+      background:linear-gradient(180deg,var(--thead),#241a44);
+      font-size:12px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border)
+    }
+    thead th:first-child{border-radius:12px 0 0 0}
+    thead th:last-child{border-radius:0 12px 0 0}
+    tbody tr{background:var(--row);border:1px solid var(--border);transition:background .15s ease, box-shadow .15s ease, transform .05s ease}
+    tbody tr:hover{background:var(--row-hover);box-shadow:0 6px 18px rgba(0,0,0,.25)}
     tbody td{padding:12px 10px;vertical-align:top;word-break:break-word}
-    tbody tr{border-radius:12px}
     tbody tr td:first-child{border-radius:12px 0 0 12px}
     tbody tr td:last-child{border-radius:0 12px 12px 0}
 
-    /* Células de texto longo: mostrar tudo, com quebras */
     .wrap-cell{
-      white-space:pre-wrap;        /* respeita \n e quebra linhas */
-      overflow-wrap:anywhere;      /* quebra palavras muito longas */
-      word-break:normal;           /* não quebrar agressivo se não precisar */
-      hyphens:auto;                /* hifenização quando aplicável */
+      white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; hyphens:auto;
     }
 
-    .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
-    .b-ok{background:rgba(34,197,94,.15);color:#b7ffd9;border-color:#256f43}
-    .b-no{background:rgba(239,68,68,.12);color:#ffc0c5;border-color:#7a2b32}
-    .muted{color:var(--muted)}
     .right{display:flex;gap:6px;justify-content:flex-end}
-    .sortable{cursor:pointer}
+    .right button{border-radius:999px;padding:8px 10px}
+    .right img{opacity:.9}
+
+    .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
+    .b-ok{background:rgba(34,197,94,.15);color:#c8ffe3;border-color:#256f43}
+    .b-no{background:rgba(239,68,68,.12);color:#ffd7db;border-color:#7a2b32}
+
+    .sortable{cursor:pointer;user-select:none}
     .sortable::after{content:" ⥯";opacity:.4}
 
-    /* compacto Y */
-    table.compact-rows{border-spacing:0 4px}
-    table.compact-rows thead th{padding:0 8px;font-size:11px}
-    table.compact-rows tbody td{padding:6px 8px;font-size:13px;line-height:1.15}
+    /* Compacidade */
+    table.compact-rows{border-spacing:0 6px}
+    table.compact-rows thead th{padding:6px 8px;font-size:11px}
+    table.compact-rows tbody td{padding:8px 8px;font-size:13px;line-height:1.15}
     table.compact-rows .badge{padding:2px 6px;font-size:11px}
     table.compact-rows .right{gap:4px}
     table.compact-rows .right button{padding:6px 10px;font-size:12px;border-radius:8px}
 
-    /* modal */
+    /* Modal */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:1000}
     .modal.open{display:flex}
     .backdrop{position:absolute;inset:0;background:rgba(5,0,20,.55);backdrop-filter:blur(2px)}
@@ -87,93 +154,93 @@
     .error{font-size:12px;color:#ffe4e6;background:rgba(239,68,68,.12);border:1px solid #7a2b32;padding:6px 8px;border-radius:8px;display:none;margin-top:8px}
     .error.show{display:block}
 
+    /* Ícone copiar Nº */
+    .numero-chamado { position: relative; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap:6px }
+    .numero-chamado .icon-copy { width:16px;height:16px; opacity:.0; transition: opacity .18s; pointer-events:none }
+    .numero-chamado:hover .icon-copy{ opacity:.9 }
+
+    /* Centralizar Validado?/Encerrado? (colunas 5 e 6) */
+    tbody td:nth-child(5), tbody td:nth-child(6),
+    thead th:nth-child(5), thead th:nth-child(6){ text-align:center }
+
+    /* Coluna Ações central: melhor alinhamento visual */
+    thead th:last-child, tbody td:last-child{ text-align:right }
+
+    /* Inputs / selects */
+    label{font-size:12px;color:var(--muted)}
+    input,textarea,select{
+      width:100%;border:1px solid var(--border);background:#221843;color:var(--text);
+      border-radius:10px;padding:10px 12px;font-size:14px;outline:none;
+      box-shadow:inset 0 0 0 1px var(--glass);
+      transition:border-color .15s ease, box-shadow .15s ease
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:var(--ring)}
+    textarea{min-height:64px;resize:vertical}
+
+    /* Grade do formulário */
+    .grid{display:grid;grid-template-columns:1.2fr 1fr .8fr .8fr .8fr .7fr;gap:10px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
     @media (max-width:900px){
       .grid{grid-template-columns:1fr}
       .stats{grid-template-columns:repeat(2,1fr)}
+      thead th{top:56px} /* compensa a altura do topo ao rolar em telas pequenas */
     }
-
-    /* Ícone de copiar número de chamado */
-    .numero-chamado {
-      position: relative;
-      cursor: pointer;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-    }
-    .icon-copy {
-      width: 16px;
-      height: 16px;
-      margin-left: 6px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      pointer-events: none;
-    }
-    .numero-chamado:hover .icon-copy { opacity: 1; }
-
-/* Centralizar conteúdo das colunas Validado? (5ª) e Encerrado? (6ª) */
-  tbody td:nth-child(5),
-  tbody td:nth-child(6),
-  thead th:nth-child(5),
-  thead th:nth-child(6) {
-    text-align: center;
-  }
-
-  /* Opcional: garante que o badge fique bem no centro */
-  tbody td:nth-child(5) .badge,
-  tbody td:nth-child(6) .badge {
-    display: inline-block;
-  }
-
-
-    
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
       <div>
-        <div class="title">Chamados Resolvidos</div>
-        <div class="subtitle">Visualize e cadastre chamados.</div>
+        <div class="title">
+          Chamados Resolvidos
+          <span class="pill">v1.0</span>
+        </div>
+        <div class="subtitle">Visualize, filtre e cadastre chamados.</div>
       </div>
-      <div class="chips">
+
+      <div class="toolbar">
+        <div class="search" title="Filtrar por Nº, usuário, problema ou correção">
+          <img class="icon" src="https://cdn-icons-png.flaticon.com/512/622/622669.png" alt="">
+          <input id="filterInput" type="search" placeholder="Filtrar chamados…" />
+        </div>
         <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
       </div>
     </header>
 
     <section>
       <div class="stats">
-        <div class="stat"><h3>Total cadastrados</h3><p id="kTotal">0</p></div>
-        <div class="stat"><h3>Validados com cliente</h3><p id="kValidados">0</p></div>
-        <div class="stat"><h3>Não validados</h3><p id="kNao">0</p></div>
-        <div class="stat"><h3>Encerrados</h3><p id="kEncerrados">0</p></div>
-        <div class="stat"><h3>Não encerrados</h3><p id="kNaoEncerrados">0</p></div>
+        <div class="stat"><h3><span class="dot"></span>Total cadastrados</h3><p id="kTotal">0</p></div>
+        <div class="stat"><h3><span class="dot"></span>Validados com cliente</h3><p id="kValidados">0</p></div>
+        <div class="stat"><h3><span class="dot"></span>Não validados</h3><p id="kNao">0</p></div>
+        <div class="stat"><h3><span class="dot"></span>Encerrados</h3><p id="kEncerrados">0</p></div>
+        <div class="stat"><h3><span class="dot"></span>Não encerrados</h3><p id="kNaoEncerrados">0</p></div>
       </div>
     </section>
 
     <section class="panel">
-      <div style="overflow:auto">
+      <div style="overflow:auto; max-height: 65vh; border-radius:12px;">
         <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
-          <!-- Colunas com larguras fixas para manter alinhamento -->
           <colgroup>
-  <col style="width:120px">   <!-- Nº chamado (↑ para não quebrar) -->
-  <col style="width:110px">   <!-- Usuário -->
-  <col style="width:35%">     <!-- Problema -->
-  <col style="width:35%">     <!-- Correção -->
-  <col style="width:90px">    <!-- Validado? -->
-  <col style="width:100px">   <!-- Encerrado? -->
-  <col style="width:120px">   <!-- Data/Hora -->
-  <col style="width:90px">    <!-- Ações -->
-</colgroup>
+            <col style="width:120px">   <!-- Nº chamado -->
+            <col style="width:110px">   <!-- Usuário -->
+            <col style="width:35%">     <!-- Problema -->
+            <col style="width:35%">     <!-- Correção -->
+            <col style="width:96px">    <!-- Validado? -->
+            <col style="width:110px">   <!-- Encerrado? -->
+            <col style="width:130px">   <!-- Data/Hora -->
+            <col style="width:96px">    <!-- Ações -->
+          </colgroup>
           <thead>
             <tr>
-              <th class="sortable" data-key="numero">Nº chamado</th>
-              <th class="sortable" data-key="usuario">Usuário</th>
-              <th class="sortable" data-key="problema">Problema</th>
-              <th class="sortable" data-key="ajuste">Correção</th>
-              <th class="sortable" data-key="validado">Validado?</th>
-              <th class="sortable" data-key="fechado">Encerrado?</th>
-              <th class="sortable" data-key="datetime">Data/Hora</th>
-              <th class="sortable" data-key="datetime">Ações</th>
+              <th class="sortable" data-key="numero" title="Ordenar por Nº">Nº chamado</th>
+              <th class="sortable" data-key="usuario" title="Ordenar por usuário">Usuário</th>
+              <th class="sortable" data-key="problema" title="Ordenar por problema">Problema</th>
+              <th class="sortable" data-key="ajuste" title="Ordenar por correção">Correção</th>
+              <th class="sortable" data-key="validado" title="Ordenar por status">Validado?</th>
+              <th class="sortable" data-key="fechado" title="Ordenar por encerramento">Encerrado?</th>
+              <th class="sortable" data-key="datetime" title="Ordenar por data/hora">Data/Hora</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -207,14 +274,14 @@
           </div>
 
           <div>
-            <label for="validado">Validado com cliente? *</label>
+            <label for="validado">Validado? *</label>
             <select id="validado" required>
               <option value="Sim" selected>Sim</option>
               <option value="Não">Não</option>
             </select>
           </div>
           <div>
-            <label for="fechado">Chamado encerrado? *</label>
+            <label for="fechado">Encerrado? *</label>
             <select id="fechado">
               <option value="Sim" selected>Sim</option>
               <option value="Não">Não</option>
@@ -290,17 +357,18 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+    signInAnonymously(auth).catch(()=>{});
 
     const BASE_PATH = 'orgs/public/chamados';
 
     const el = (id)=>document.getElementById(id);
-    const state = { rows: [], sort:{key:'datetime', dir:'desc'} };
+    const state = { rows: [], sort:{key:'datetime', dir:'desc'}, filter:'' };
     const EDIT_PASSWORD = '1234';
 
     const todayISO = () => new Date().toISOString().split('T')[0];
     const timeHM = () => { const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; }
     const fmtDate = (iso) => { try{ return new Date(iso).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) }catch{ return '-' } }
-    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&gt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])).replace(/&gt;/g,'&gt;');
 
     function openModal(){ const m = el('formModal'); m.classList.add('open'); document.body.classList.add('modal-open'); resetForm(); el('numero').focus(); }
     function closeModal(){ const m = el('formModal'); m.classList.remove('open'); document.body.classList.remove('modal-open'); }
@@ -419,7 +487,7 @@
     }
     window.deleteRowByKey = deleteRowByKey;
 
-    // Ordenação ao clicar no header
+    // Ordenação por cabeçalho
     document.addEventListener('click', (e)=>{
       const th = e.target.closest('th.sortable');
       if(!th) return;
@@ -433,9 +501,33 @@
       render();
     });
 
+    // Filtro rápido
+    const filterInput = el('filterInput');
+    let filterTimer=null;
+    filterInput.addEventListener('input', ()=>{
+      const v = filterInput.value.trim().toLowerCase();
+      if(filterTimer) clearTimeout(filterTimer);
+      filterTimer = setTimeout(()=>{ state.filter = v; render(); }, 120);
+    });
+
     // Render
     function render(){
       let rows = [...state.rows];
+
+      // filtro
+      if(state.filter){
+        const f = state.filter;
+        rows = rows.filter(r=>{
+          return (
+            (r.numero||'').toString().toLowerCase().includes(f) ||
+            (r.usuario||'').toLowerCase().includes(f) ||
+            (r.problema||'').toLowerCase().includes(f) ||
+            (r.ajuste||'').toLowerCase().includes(f)
+          );
+        });
+      }
+
+      // ordenação
       const {key, dir} = state.sort;
       rows.sort((a,b)=>{
         let va=a[key], vb=b[key];
@@ -447,12 +539,14 @@
         return 0;
       });
 
+      // estatísticas
       el('kTotal').textContent = rows.length;
       el('kValidados').textContent = rows.filter(r=>r.validado==='Sim').length;
       el('kNao').textContent = rows.filter(r=>r.validado==='Não').length;
       el('kEncerrados').textContent = rows.filter(r => r.fechado === 'Sim').length;
       el('kNaoEncerrados').textContent = rows.filter(r => r.fechado === 'Não').length;
 
+      // tabela
       const tbody = el('tbody');
       tbody.innerHTML = '';
       if(rows.length===0){
@@ -460,6 +554,7 @@
         const td = document.createElement('td');
         td.colSpan = 8;
         td.className='muted';
+        td.style.textAlign='center';
         td.textContent = 'Sem registros para exibir.';
         tr.appendChild(td); tbody.appendChild(tr);
       }else{
@@ -467,9 +562,9 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <span class="numero-chamado" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')">
+              <span class="numero-chamado" onclick="navigator.clipboard.writeText('${escapeHtml(r.numero)}')" title="Copiar Nº do chamado">
                 ${escapeHtml(r.numero)}
-                <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/15430/15430295.png" alt="Copiar número" title="Copiar" width="16" height="16">
+                <img class="icon-copy" src="https://cdn-icons-png.flaticon.com/512/15430/15430295.png" alt="Copiar" width="16" height="16">
               </span>
             </td>
             <td>${escapeHtml(r.usuario || '—')}</td>
@@ -480,7 +575,7 @@
                   : '<span class="badge b-no">Não</span>'}</td>
             <td>${r.fechado==='Sim'
                   ? '<span class="badge b-ok">Sim</span>'
-                  : '<span class="badge">Não</span>'}</td>
+                  : '<span class="badge b-no">Não</span>'}</td>
             <td><span class="muted">${fmtDate(r.datetime)}</span></td>
             <td>
               <div class="right">
@@ -513,7 +608,6 @@
     el('modalBackdrop').addEventListener('click', closeModal);
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
     el('form').addEventListener('submit', upsertRow);
-
 
     // Boot
     setupNumeroMask();
