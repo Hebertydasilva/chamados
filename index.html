@@ -415,7 +415,6 @@
 
     async function deleteRowByKey(key){
       if(!await checkPassword()) return;
-      if(!confirm('Remover este registro?')) return;
       await remove(ref(db, `${BASE_PATH}/${key}`));
     }
     window.deleteRowByKey = deleteRowByKey;
