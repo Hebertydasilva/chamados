@@ -16,32 +16,10 @@
     *{box-sizing:border-box}
     body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2) 70%);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45}
     .wrap{max-width:1250px;margin:24px auto;padding:0 16px}
-
-    /* ===== Header novo, mais organizado ===== */
-    .header{margin-bottom:16px;}
-    .header__top{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:16px;
-      padding-bottom:10px;
-      border-bottom:1px solid var(--border);
-    }
-    .header__titles{display:flex;flex-direction:column;gap:4px}
-    .header .title{
-      font-size:clamp(20px,2.8vw,30px);
-      font-weight:800;letter-spacing:.3px;margin:0;color:#f5f3ff;
-    }
-    .header .subtitle{color:var(--muted);font-size:12px;margin:0}
-    .header__cta{display:flex;align-items:center;gap:8px}
-    @media (max-width:700px){
-      .header__top{align-items:flex-start;flex-direction:column;gap:10px}
-      .header__cta{align-self:stretch}
-      .header__cta .primary{width:100%}
-    }
-
+    header{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:16px}
+    .title{font-size:clamp(18px,2.5vw,28px);font-weight:800;letter-spacing:.3px}
+    .subtitle{color:var(--muted);font-size:12px}
     .panel{background:linear-gradient(180deg,var(--panel),#271c49);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-
     /* 6 colunas no form */
     .grid{display:grid;grid-template-columns:1fr 1fr .8fr .8fr .8fr .7fr;gap:10px}
     label{font-size:12px;color:var(--muted)}
@@ -52,6 +30,8 @@
     button{border:1px solid var(--border);background:#23194a;color:var(--text);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
     button.primary{background:linear-gradient(90deg,var(--primary),var(--primary-2));color:#0b041a;border:0}
     button.ghost{background:transparent}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+    .chip{background:var(--chip);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;color:#ddd}
 
     /* Cards de estatística */
     .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:16px 0}
@@ -70,10 +50,10 @@
 
     /* Células de texto longo: mostrar tudo, com quebras */
     .wrap-cell{
-      white-space:pre-wrap;
-      overflow-wrap:anywhere;
-      word-break:normal;
-      hyphens:auto;
+      white-space:pre-wrap;        /* respeita \n e quebra linhas */
+      overflow-wrap:anywhere;      /* quebra palavras muito longas */
+      word-break:normal;           /* não quebrar agressivo se não precisar */
+      hyphens:auto;                /* hifenização quando aplicável */
     }
 
     .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
@@ -130,29 +110,33 @@
     }
     .numero-chamado:hover .icon-copy { opacity: 1; }
 
-    /* Centralizar colunas Validado? e Encerrado? */
-    tbody td:nth-child(5),
-    tbody td:nth-child(6),
-    thead th:nth-child(5),
-    thead th:nth-child(6) {
-      text-align: center;
-    }
-    tbody td:nth-child(5) .badge,
-    tbody td:nth-child(6) .badge { display:inline-block; }
+/* Centralizar conteúdo das colunas Validado? (5ª) e Encerrado? (6ª) */
+  tbody td:nth-child(5),
+  tbody td:nth-child(6),
+  thead th:nth-child(5),
+  thead th:nth-child(6) {
+    text-align: center;
+  }
+
+  /* Opcional: garante que o badge fique bem no centro */
+  tbody td:nth-child(5) .badge,
+  tbody td:nth-child(6) .badge {
+    display: inline-block;
+  }
+
+
+    
   </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- ===== Cabeçalho novo ===== -->
-    <header class="header">
-      <div class="header__top">
-        <div class="header__titles">
-          <h1 class="title">Chamados Resolvidos</h1>
-          <p class="subtitle">Visualize e cadastre chamados.</p>
-        </div>
-        <div class="header__cta">
-          <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
-        </div>
+    <header>
+      <div>
+        <div class="title">Chamados Resolvidos</div>
+        <div class="subtitle">Visualize e cadastre chamados.</div>
+      </div>
+      <div class="chips">
+        <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
       </div>
     </header>
 
@@ -169,16 +153,17 @@
     <section class="panel">
       <div style="overflow:auto">
         <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
+          <!-- Colunas com larguras fixas para manter alinhamento -->
           <colgroup>
-            <col style="width:120px">   <!-- Nº chamado -->
-            <col style="width:110px">   <!-- Usuário -->
-            <col style="width:35%">     <!-- Problema -->
-            <col style="width:35%">     <!-- Correção -->
-            <col style="width:90px">    <!-- Validado? -->
-            <col style="width:100px">   <!-- Encerrado? -->
-            <col style="width:120px">   <!-- Data/Hora -->
-            <col style="width:90px">    <!-- Ações -->
-          </colgroup>
+  <col style="width:120px">   <!-- Nº chamado (↑ para não quebrar) -->
+  <col style="width:110px">   <!-- Usuário -->
+  <col style="width:35%">     <!-- Problema -->
+  <col style="width:35%">     <!-- Correção -->
+  <col style="width:90px">    <!-- Validado? -->
+  <col style="width:100px">   <!-- Encerrado? -->
+  <col style="width:120px">   <!-- Data/Hora -->
+  <col style="width:90px">    <!-- Ações -->
+</colgroup>
           <thead>
             <tr>
               <th class="sortable" data-key="numero">Nº chamado</th>
@@ -528,6 +513,7 @@
     el('modalBackdrop').addEventListener('click', closeModal);
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
     el('form').addEventListener('submit', upsertRow);
+
 
     // Boot
     setupNumeroMask();
