@@ -131,44 +131,15 @@
 <body>
   <div class="wrap">
     <header>
-  <div>
-    <div class="title">Chamados Resolvidos</div>
-    <div class="subtitle">Visualize e cadastre chamados.</div>
-  </div>
+      <div>
+        <div class="title">Chamados Resolvidos</div>
+        <div class="subtitle">Visualize e cadastre chamados.</div>
+      </div>
+      <div class="chips">
+        <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
+      </div>
+    </header>
 
-  <!-- Nova barra de ferramentas -->
-  <div class="toolbar">
-    <input class="search" type="text" placeholder="Buscar nº, usuário ou palavra-chave...">
-    <div class="tools">
-      <button class="ghost">Filtrar</button>
-      <button id="openFormBtn" class="primary" title="Cadastrar chamado">Cadastrar chamado</button>
-    </div>
-  </div>
-</header>
-
-
-.toolbar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
-}
-.search {
-  flex: 1;
-  max-width: 520px;
-  padding: 8px 12px;
-  background: #221843;
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 10px;
-}
-.tools {
-  display: flex;
-  gap: 8px;
-}
-
-    
     <section>
       <div class="stats">
         <div class="stat"><h3>Total cadastrados</h3><p id="kTotal">0</p></div>
