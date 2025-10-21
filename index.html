@@ -20,7 +20,6 @@
     .title{font-size:clamp(18px,2.5vw,28px);font-weight:800;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:12px}
     .panel{background:linear-gradient(180deg,var(--panel),#271c49);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-
     /* 6 colunas no form */
     .grid{display:grid;grid-template-columns:1fr 1fr .8fr .8fr .8fr .7fr;gap:10px}
     label{font-size:12px;color:var(--muted)}
@@ -42,64 +41,19 @@
 
     /* Tabela com larguras fixas e quebra de palavras */
     table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}
+    thead th{font-size:12px;color:var(--muted);text-align:left;padding:0 10px}
     tbody tr{background:var(--card);border:1px solid var(--border)}
     tbody td{padding:12px 10px;vertical-align:top;word-break:break-word}
     tbody tr{border-radius:12px}
     tbody tr td:first-child{border-radius:12px 0 0 12px}
     tbody tr td:last-child{border-radius:0 12px 12px 0}
 
-    /* Cabeçalho sticky + estilo */
-    thead { position: sticky; top: 0; z-index: 5; }
-    thead th{
-      background: linear-gradient(180deg, #2b1f4e, #261b48);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 12px !important;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      font-weight: 700;
-      font-size: 11.5px;
-      color: #cfcfe8;
-      white-space: nowrap;
-      text-align: left;
-    }
-    thead tr::after{content:"";display:block;height:6px}
-
-    /* Centralizar Validado? (5ª) e Encerrado? (6ª) no header e no corpo */
-    thead th:nth-child(5),
-    thead th:nth-child(6),
-    tbody td:nth-child(5),
-    tbody td:nth-child(6) { text-align:center; }
-
-    /* Cabeçalho: ordenável vs não ordenável */
-    th.no-sort{ cursor: default; color: var(--muted); }
-    th.sortable{
-      cursor: pointer;
-      user-select: none;
-      position: relative;
-      padding-right: 22px !important; /* espaço pro ícone */
-    }
-    th.sortable::after{
-      content: "▵"; /* neutro */
-      position: absolute; right: 8px; top: 50%;
-      transform: translateY(-58%);
-      font-size: 12px; opacity: .35;
-    }
-    th.sortable[data-sort="asc"]::after{ content: "▲"; opacity: .9; }
-    th.sortable[data-sort="desc"]::after{ content: "▼"; opacity: .9; }
-    th.sortable:hover{ color:#fff; }
-    th.sortable:focus-visible{
-      outline:2px solid var(--accent);
-      outline-offset:2px;
-      border-radius:6px;
-    }
-
     /* Células de texto longo: mostrar tudo, com quebras */
     .wrap-cell{
       white-space:pre-wrap;        /* respeita \n e quebra linhas */
       overflow-wrap:anywhere;      /* quebra palavras muito longas */
-      word-break:normal;
-      hyphens:auto;
+      word-break:normal;           /* não quebrar agressivo se não precisar */
+      hyphens:auto;                /* hifenização quando aplicável */
     }
 
     .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);display:inline-block;background:#241a3b;color:#e9e7ff}
@@ -108,10 +62,11 @@
     .muted{color:var(--muted)}
     .right{display:flex;gap:6px;justify-content:flex-end}
     .sortable{cursor:pointer}
+    .sortable::after{content:" ⥯";opacity:.4}
 
     /* compacto Y */
     table.compact-rows{border-spacing:0 4px}
-    table.compact-rows thead th{padding:10px 12px;font-size:11.5px}
+    table.compact-rows thead th{padding:0 8px;font-size:11px}
     table.compact-rows tbody td{padding:6px 8px;font-size:13px;line-height:1.15}
     table.compact-rows .badge{padding:2px 6px;font-size:11px}
     table.compact-rows .right{gap:4px}
@@ -135,13 +90,42 @@
     @media (max-width:900px){
       .grid{grid-template-columns:1fr}
       .stats{grid-template-columns:repeat(2,1fr)}
-      thead th { font-size:11px }
     }
 
     /* Ícone de copiar número de chamado */
-    .numero-chamado { position: relative; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; }
-    .icon-copy { width: 16px; height: 16px; margin-left: 6px; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+    .numero-chamado {
+      position: relative;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+    }
+    .icon-copy {
+      width: 16px;
+      height: 16px;
+      margin-left: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
     .numero-chamado:hover .icon-copy { opacity: 1; }
+
+/* Centralizar conteúdo das colunas Validado? (5ª) e Encerrado? (6ª) */
+  tbody td:nth-child(5),
+  tbody td:nth-child(6),
+  thead th:nth-child(5),
+  thead th:nth-child(6) {
+    text-align: center;
+  }
+
+  /* Opcional: garante que o badge fique bem no centro */
+  tbody td:nth-child(5) .badge,
+  tbody td:nth-child(6) .badge {
+    display: inline-block;
+  }
+
+
+    
   </style>
 </head>
 <body>
@@ -171,25 +155,25 @@
         <table class="compact-rows" aria-label="Tabela de chamados resolvidos">
           <!-- Colunas com larguras fixas para manter alinhamento -->
           <colgroup>
-            <col style="width:120px">   <!-- Nº chamado -->
-            <col style="width:110px">   <!-- Usuário -->
-            <col style="width:35%">     <!-- Problema -->
-            <col style="width:35%">     <!-- Correção -->
-            <col style="width:90px">    <!-- Validado? -->
-            <col style="width:100px">   <!-- Encerrado? -->
-            <col style="width:120px">   <!-- Data/Hora -->
-            <col style="width:90px">    <!-- Ações -->
-          </colgroup>
+  <col style="width:120px">   <!-- Nº chamado (↑ para não quebrar) -->
+  <col style="width:110px">   <!-- Usuário -->
+  <col style="width:35%">     <!-- Problema -->
+  <col style="width:35%">     <!-- Correção -->
+  <col style="width:90px">    <!-- Validado? -->
+  <col style="width:100px">   <!-- Encerrado? -->
+  <col style="width:120px">   <!-- Data/Hora -->
+  <col style="width:90px">    <!-- Ações -->
+</colgroup>
           <thead>
             <tr>
-              <th class="sortable" data-key="numero"   scope="col" aria-sort="none">Nº chamado</th>
-              <th class="sortable" data-key="usuario"  scope="col" aria-sort="none">Usuário</th>
-              <th class="sortable" data-key="problema" scope="col" aria-sort="none">Problema</th>
-              <th class="sortable" data-key="ajuste"   scope="col" aria-sort="none">Correção</th>
-              <th class="sortable" data-key="validado" scope="col" aria-sort="none">Validado?</th>
-              <th class="sortable" data-key="fechado"  scope="col" aria-sort="none">Encerrado?</th>
-              <th class="sortable" data-key="datetime" scope="col" aria-sort="descending">Data/Hora</th>
-              <th class="no-sort"  scope="col">Ações</th>
+              <th class="sortable" data-key="numero">Nº chamado</th>
+              <th class="sortable" data-key="usuario">Usuário</th>
+              <th class="sortable" data-key="problema">Problema</th>
+              <th class="sortable" data-key="ajuste">Correção</th>
+              <th class="sortable" data-key="validado">Validado?</th>
+              <th class="sortable" data-key="fechado">Encerrado?</th>
+              <th class="sortable" data-key="datetime">Data/Hora</th>
+              <th class="sortable" data-key="datetime">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -435,17 +419,6 @@
     }
     window.deleteRowByKey = deleteRowByKey;
 
-    // Atualiza setas e aria-sort nos headers
-    function updateHeaderSortIndicators(){
-      document.querySelectorAll('th.sortable').forEach(th=>{
-        const k = th.dataset.key;
-        let mode = 'none';
-        if(state.sort.key === k) mode = state.sort.dir; // 'asc' | 'desc'
-        th.setAttribute('data-sort', mode);
-        th.setAttribute('aria-sort', mode==='none' ? 'none' : (mode==='asc' ? 'ascending' : 'descending'));
-      });
-    }
-
     // Ordenação ao clicar no header
     document.addEventListener('click', (e)=>{
       const th = e.target.closest('th.sortable');
@@ -458,7 +431,6 @@
         state.sort.key = k; state.sort.dir = 'asc';
       }
       render();
-      updateHeaderSortIndicators();
     });
 
     // Render
@@ -524,9 +496,6 @@
           tbody.appendChild(tr);
         });
       }
-
-      // mantém os indicadores em sincronia com o estado
-      updateHeaderSortIndicators();
     }
 
     function attachRealtime(){
@@ -544,6 +513,7 @@
     el('modalBackdrop').addEventListener('click', closeModal);
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
     el('form').addEventListener('submit', upsertRow);
+
 
     // Boot
     setupNumeroMask();
